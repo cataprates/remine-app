@@ -62,18 +62,21 @@ custom_css = """
     background-color: #FFFFFF !important;
     border-radius: 30px 30px 0 0 !important;
     margin-top: 100px !important; 
-    padding: 20px 15px 150px 15px !important; 
+    padding: 20px 15px 0px 15px !important; 
     max-width: 800px !important;
     min-height: 100vh !important;
 }
 
+/* 🚨 SOLID WHITE BOTTOM BAR FIX 🚨 */
 [data-testid="stBottom"] {
     background-color: #FFFFFF !important; 
-    z-index: 99998 !important;
+    background-image: none !important; /* Forces Streamlit gradients to die */
+    z-index: 999999 !important;
+    border-top: 1px solid #EEEEEE !important; /* Clean visual separator */
 }
 [data-testid="stBottom"] > div {
     background-color: #FFFFFF !important;
-    padding: 10px 20px 30px 20px !important; 
+    padding: 10px 20px 30px 20px !important; /* Extra 30px padding for iPhone safe area! */
     max-width: 800px !important;
     margin: 0 auto !important;
 }
@@ -148,6 +151,10 @@ for msg in st.session_state.messages:
             st.image(msg["image"], width=250)
         if msg["content"]:
             st.markdown(msg["content"])
+
+# 🚨 THE "SPACER HACK" FOR MOBILE OVERLAPS 🚨
+# This invisible box forces the text up so it NEVER hides behind the input bar!
+st.markdown("<div style='height: 140px;'></div>", unsafe_allow_html=True)
 
 # ==========================================
 # 4. CHAT INPUT LOGIC
