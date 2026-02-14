@@ -115,4 +115,83 @@ custom_css = """
     justify-content: flex-start !important;
 }
 [data-testid="stChatMessage"][data-testid*="assistant"] [data-testid="stChatMessageContent"] {
-    border-radius: 2
+    border-radius: 20px 20px 20px 5px !important; 
+}
+
+[data-testid="stChatMessage"][data-testid*="user"] {
+    flex-direction: row-reverse !important;
+}
+[data-testid="stChatMessage"][data-testid*="user"] [data-testid="stChatMessageContent"] {
+    border-radius: 20px 20px 5px 20px !important; 
+    background-color: #2A2A2A !important; 
+}
+</style>
+
+<div class="custom-header">
+    <h1>RE-MINE</h1>
+</div>
+"""
+st.markdown(custom_css, unsafe_allow_html=True)
+
+# ==========================================
+# 3. CHAT MEMORY SETUP
+# ==========================================
+if "chat_session" not in st.session_state:
+    st.session_state.chat_session = model.start_chat(history=[])
+
+if "messages" not in st.session_state:
+    st.session_state.messages = [{"role": "assistant", "content": "Upload a photo of an electronic device, and I'll tell you its hidden value.", "image": None}]
+
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        if msg.get("image"):
+            st.image(msg["image"], width=250)
+        if msg["content"]:
+            st.markdown(msg["content"])
+
+# ==========================================
+# 4. CHAT INPUT LOGIC
+# ==========================================
+prompt = st.chat_input("Ask me anything...", accept_file=True, file_type=["png", "jpg", "jpeg"])
+
+if prompt:
+    user_text = prompt.text
+    user_files = prompt.files
+    
+    with st.chat_message("user"):
+        img_to_show = None
+        if user_files:
+            img_to_show = Image.open(user_files[0])
+            img_to_show.load() 
+            st.image(img_to_show, width=250)
+            
+        if user_text:
+            st.markdown(user_text)
+            
+    st.session_state.messages.append({
+        "role": "user", 
+        "content": user_text, 
+        "image": img_to_show
+    })
+    
+    gemini_input = []
+    if user_files:
+        gemini_input.append(img_to_show)
+    
+    if user_text:
+        gemini_input.append(user_text)
+    elif user_files:
+        gemini_input.append("Please analyze this electronic component and give me the breakdown.")
+        
+    with st.chat_message("assistant"):
+        with st.spinner("Analyzing..."):
+            try:
+                res = st.session_state.chat_session.send_message(gemini_input)
+                st.markdown(res.text)
+                st.session_state.messages.append({
+                    "role": "assistant", 
+                    "content": res.text, 
+                    "image": None
+                })
+            except Exception as e:
+                st.error(f"Analysis Error: {e}")
