@@ -3,12 +3,13 @@ import google.generativeai as genai
 from PIL import Image
 
 # ==========================================
-# 1. API CONFIGURATION
+# 1. API CONFIGURATION (SECURE MODE)
 # ==========================================
-CHAVE_API = "AIzaSyD7agoTWVonaQuhuVauBIwfb9UlqWH2lpE" # Put your key here
+# The app now securely pulls the key from Streamlit's hidden vault!
+CHAVE_API = st.secrets["GEMINI_API_KEY"] 
 genai.configure(api_key=CHAVE_API)
 
-# Initialize the model (Using the powerhouse we discovered you have!)
+# Initialize the model
 model = genai.GenerativeModel('models/gemini-2.5-flash')
 
 # ==========================================
@@ -41,7 +42,7 @@ if foto:
     img = Image.open(foto)
     st.image(img, caption="Analyzing for precious metals...", use_container_width=True)
     
-    # The new Global & Monetization Prompt
+    # The Global & Monetization Prompt
     prompt = """
     You are RE-MINE, an expert AI in urban mining and e-waste recycling. 
     Analyze the provided image and give a structured report:
@@ -68,7 +69,6 @@ if foto:
 # ==========================================
 # 4. CONVERSATIONAL AI CHAT
 # ==========================================
-# This allows the user to ask follow-up questions about the photo or recycling in general
 if pergunta := st.chat_input("Ask me anything about selling or dismantling this..."):
     
     # Show user message
@@ -76,7 +76,7 @@ if pergunta := st.chat_input("Ask me anything about selling or dismantling this.
         st.markdown(pergunta)
     st.session_state.messages.append({"role": "user", "content": pergunta})
     
-    # Get AI response (it will remember the photo because we use chat_session)
+    # Get AI response 
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
             res = st.session_state.chat_session.send_message(pergunta)
