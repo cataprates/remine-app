@@ -3,13 +3,10 @@ import google.generativeai as genai
 from PIL import Image
 
 # ==========================================
-# 1. INITIAL SETUP (MUST BE FIRST)
+# 1. INITIAL SETUP
 # ==========================================
 st.set_page_config(page_title="RE-MINE", page_icon="🟣", layout="centered", initial_sidebar_state="collapsed")
 
-# ==========================================
-# 2. API CONFIGURATION
-# ==========================================
 CHAVE_API = st.secrets["GEMINI_API_KEY"] 
 genai.configure(api_key=CHAVE_API)
 
@@ -33,23 +30,15 @@ model = genai.GenerativeModel(
 )
 
 # ==========================================
-# 3. CSS MASTER INJECTION (BUG FIXES)
+# 2. CSS MASTER INJECTION
 # ==========================================
 custom_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Audiowide&family=Inter:wght@400;500;600&display=swap');
 
-/* 1. Global Background */
-.stApp {
-    background-color: #727272 !important; 
-}
+.stApp { background-color: #727272 !important; }
+[data-testid="stHeader"] { display: none !important; }
 
-/* Hide Streamlit's default header */
-[data-testid="stHeader"] {
-    display: none !important;
-}
-
-/* 2. Custom Fixed Header (Grey Area) */
 .custom-header {
     position: fixed;
     top: 0;
@@ -58,30 +47,28 @@ custom_css = """
     background-color: #727272 !important;
     z-index: 99999;
     text-align: center;
-    padding: 50px 0 20px 0; /* Pushes it down safely below mobile clocks/batteries */
+    padding: 50px 0 20px 0;
 }
 .custom-header h1 {
     font-family: 'Audiowide', sans-serif !important;
-    color: #DDA0DD !important; /* Canva Lilac */
+    color: #DDA0DD !important; 
     font-size: 3rem !important;
     margin: 0 !important;
     letter-spacing: 2px !important;
     line-height: 1 !important;
 }
 
-/* 3. The White Chat Area */
 [data-testid="stMainBlockContainer"] {
     background-color: #FFFFFF !important;
     border-radius: 30px 30px 0 0 !important;
-    margin-top: 100px !important; /* Pushes the white box down so the grey header shows */
-    padding: 20px 15px 150px 15px !important; /* Massive bottom padding so text doesn't hide behind input */
+    margin-top: 100px !important; 
+    padding: 20px 15px 150px 15px !important; 
     max-width: 800px !important;
     min-height: 100vh !important;
 }
 
-/* 4. Chat Input Bar Fix (Stops the overlapping bug!) */
 [data-testid="stBottom"] {
-    background-color: #FFFFFF !important; /* Solid white hides scrolling text! */
+    background-color: #FFFFFF !important; 
     z-index: 99998 !important;
 }
 [data-testid="stBottom"] > div {
@@ -91,6 +78,41 @@ custom_css = """
     margin: 0 auto !important;
 }
 
-/* The Black Pill Input */
-[data-testid="stChatInput"] {
-    background-
+[data-testid="stChatInput"] { background-color: transparent !important; }
+[data-testid="stChatInput"] > div {
+    background-color: #222222 !important;
+    border-radius: 50px !important;
+    border: none !important;
+    padding: 5px 15px !important;
+}
+[data-testid="stChatInput"] textarea {
+    color: #FFFFFF !important;
+    font-family: 'Inter', sans-serif !important;
+}
+[data-testid="stChatInput"] button { color: #DDA0DD !important; }
+[data-testid="stChatInput"] svg { fill: #DDA0DD !important; }
+
+[data-testid="stChatMessageAvatar"] { display: none !important; }
+[data-testid="stChatMessage"] {
+    background-color: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin-bottom: 20px !important;
+    gap: 0 !important; 
+}
+
+[data-testid="stChatMessageContent"] {
+    background-color: #222222 !important;
+    color: #FFFFFF !important;
+    padding: 15px 20px !important;
+    width: fit-content !important;
+    max-width: 85% !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+[data-testid="stChatMessage"][data-testid*="assistant"] {
+    flex-direction: row !important;
+    justify-content: flex-start !important;
+}
+[data-testid="stChatMessage"][data-testid*="assistant"] [data-testid="stChatMessageContent"] {
+    border-radius: 2
