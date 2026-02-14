@@ -148,4 +148,53 @@ if "messages" not in st.session_state:
 
 # Render previous messages
 for msg in st.session_state.messages:
-    with st.chat_message(
+    with st.chat_message(msg["role"]):
+        if msg.get("image"):
+            st.image(msg["image"], width=250)
+        if msg["content"]:
+            st.markdown(msg["content"])
+
+# ==========================================
+# 4. CHAT INPUT WITH PAPERCLIP
+# ==========================================
+prompt = st.chat_input("Ask me anything...", accept_file=True, file_type=["png", "jpg", "jpeg"])
+
+if prompt:
+    user_text = prompt.text
+    user_files = prompt.files
+    
+    with st.chat_message("user"):
+        img_to_show = None
+        if user_files:
+            img_to_show = Image.open(user_files[0])
+            st.image(img_to_show, width=250)
+        if user_text:
+            st.markdown(user_text)
+            
+    st.session_state.messages.append({
+        "role": "user", 
+        "content": user_text, 
+        "image": img_to_show
+    })
+    
+    gemini_input = []
+    if user_files:
+        gemini_input.append(img_to_show)
+    
+    if user_text:
+        gemini_input.append(user_text)
+    elif user_files:
+        gemini_input.append("Please analyze this electronic component and give me the breakdown.")
+        
+    with st.chat_message("assistant"):
+        with st.spinner("Analyzing..."):
+            try:
+                res = st.session_state.chat_session.send_message(gemini_input)
+                st.markdown(res.text)
+                st.session_state.messages.append({
+                    "role": "assistant", 
+                    "content": res.text, 
+                    "image": None
+                })
+            except Exception as e:
+                st.error(f"Analysis Error: {e}")
